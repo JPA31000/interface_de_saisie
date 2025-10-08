@@ -18,16 +18,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // Icônes Lucide en inline
-        const Plus = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
-        const Trash2 = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>;
-        const Save = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
-        const Download = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>;
-        const Upload = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>;
-        const Eye = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
-        const Edit2 = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
-        const X = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
-
+        // Composant principal
         const DataEntryInterface = () => {
           const [activeTab, setActiveTab] = useState('jobs');
           const [jobs, setJobs] = useState(() => {
@@ -66,27 +57,24 @@
             description: ''
           });
 
-          const domains = ['Informatique', 'Santé', 'Commerce', 'Création', 'Social', 'Construction', 'Gestion'];
-          const formationTypes = ['BTS', 'BUT', 'Licence', 'Master', 'École', 'Diplôme d\'État'];
-          const interestsList = ['technologie', 'sciences', 'social', 'creation', 'artistique', 'logique'];
-          const valuesList = ['aider', 'argent', 'autonomie', 'innovation', 'stabilite', 'utilite'];
-          const workStyleOptions = {
-            lieu: ['bureau', 'terrain'],
-            organisation: ['equipe', 'solo'],
-            type: ['intellectuel', 'manuel']
-          };
-          const subjectsList = ['mathematiques', 'physique', 'svt', 'technologie', 'economie', 'langues'];
+          const domains = ['Informatique', 'Santé', 'Commerce', 'Création', 'Social', 'Construction', 'Gestion', 'Ingénierie'];
+          const formationTypes = ['BTS', 'BUT', 'Licence', 'Master', 'École', "Diplôme d'État"];
+          const interestsList = ['technologie', 'sciences', 'social', 'creation', 'artistique', 'logique', 'entrepreneurial', 'psychologie', 'gestion'];
+          const valuesList = ['aider', 'argent', 'autonomie', 'innovation', 'stabilite', 'utilite', 'expression', 'precision'];
+          const subjectsList = ['mathematiques', 'physique', 'svt', 'technologie', 'economie', 'langues', 'philosophie', 'arts'];
 
           const handleSaveJob = () => {
             if (!currentJob.name || !currentJob.domain) {
-              alert('Le nom et le domaine sont obligatoires');
+              alert('⚠️ Le nom et le domaine sont obligatoires');
               return;
             }
 
             const jobToSave = {
               ...currentJob,
+              id: editingJobId || currentJob.id,
               salary: {
-                ...currentJob.salary,
+                min: parseInt(currentJob.salary.min) || 0,
+                max: parseInt(currentJob.salary.max) || 0,
                 display: `${currentJob.salary.min}-${currentJob.salary.max}k€`
               },
               advantages: currentJob.advantages.filter(a => a.trim() !== ''),
@@ -96,11 +84,11 @@
             let updatedJobs;
             if (editingJobId) {
               updatedJobs = jobs.map(j => j.id === editingJobId ? jobToSave : j);
-              alert('Métier modifié !');
+              alert('✅ Métier modifié avec succès !');
               setEditingJobId(null);
             } else {
               updatedJobs = [...jobs, jobToSave];
-              alert('Métier ajouté !');
+              alert('✅ Métier ajouté avec succès !');
             }
 
             setJobs(updatedJobs);
@@ -129,13 +117,69 @@
             });
           };
 
+          const handleEditJob = (job) => {
+            setCurrentJob(job);
+            setEditingJobId(job.id);
+            setActiveTab('jobs');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          const handleDeleteJob = (id) => {
+            if (window.confirm('Supprimer ce métier ?')) {
+              const updatedJobs = jobs.filter(j => j.id !== id);
+              setJobs(updatedJobs);
+              localStorage.setItem('orientation_jobs', JSON.stringify(updatedJobs));
+            }
+          };
+
+          const handleSaveFormation = () => {
+            if (!currentFormation.name || !currentFormation.type) {
+              alert('⚠️ Le nom et le type sont obligatoires');
+              return;
+            }
+
+            const formationToSave = {
+              ...currentFormation,
+              duration: parseInt(currentFormation.duration)
+            };
+
+            const updatedFormations = [...formations, formationToSave];
+            setFormations(updatedFormations);
+            localStorage.setItem('orientation_formations', JSON.stringify(updatedFormations));
+            setCurrentFormation({ id: Date.now(), name: '', shortName: '', type: '', duration: '', description: '' });
+            alert('✅ Formation ajoutée avec succès !');
+          };
+
+          const handleDeleteFormation = (id) => {
+            if (window.confirm('Supprimer cette formation ?')) {
+              const updatedFormations = formations.filter(f => f.id !== id);
+              setFormations(updatedFormations);
+              localStorage.setItem('orientation_formations', JSON.stringify(updatedFormations));
+            }
+          };
+
+          const addFormationToJob = (formationId) => {
+            const formation = formations.find(f => f.id === parseInt(formationId));
+            if (formation && !currentJob.formations.find(f => f.name === formation.name)) {
+              setCurrentJob({
+                ...currentJob,
+                formations: [...currentJob.formations, {
+                  name: formation.shortName || formation.name,
+                  duration: formation.duration
+                }]
+              });
+            }
+          };
+
           const handleExportJSON = () => {
             const dataToExport = {
               metadata: {
                 version: '1.0.0',
                 lastUpdate: new Date().toISOString().split('T')[0],
                 totalJobs: jobs.length,
-                totalFormations: formations.length
+                totalFormations: formations.length,
+                exportedFrom: 'Interface de Saisie',
+                exportDate: new Date().toISOString()
               },
               jobs: jobs,
               formations: formations
@@ -147,7 +191,77 @@
             a.href = url;
             a.download = `orientation-data-${new Date().toISOString().split('T')[0]}.json`;
             a.click();
-            alert(`✅ Export réussi !\n\n${jobs.length} métiers, ${formations.length} formations`);
+            alert(`✅ Export réussi !\n\n📊 ${jobs.length} métiers, ${formations.length} formations`);
+          };
+
+          const handleImportJSON = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                try {
+                  const data = JSON.parse(e.target.result);
+                  if (data.jobs) {
+                    setJobs(data.jobs);
+                    localStorage.setItem('orientation_jobs', JSON.stringify(data.jobs));
+                  }
+                  if (data.formations) {
+                    setFormations(data.formations);
+                    localStorage.setItem('orientation_formations', JSON.stringify(data.formations));
+                  }
+                  alert('✅ Import réussi !');
+                } catch (error) {
+                  alert('❌ Erreur lors de l\'import du fichier');
+                }
+              };
+              reader.readAsText(file);
+            }
+          };
+
+          const toggleArrayValue = (field, value) => {
+            setCurrentJob(prev => ({
+              ...prev,
+              [field]: prev[field].includes(value)
+                ? prev[field].filter(v => v !== value)
+                : [...prev[field], value]
+            }));
+          };
+
+          const toggleStudyYear = (year) => {
+            setCurrentJob(prev => ({
+              ...prev,
+              studyYears: prev.studyYears.includes(year)
+                ? prev.studyYears.filter(y => y !== year)
+                : [...prev.studyYears, year].sort((a, b) => a - b)
+            }));
+          };
+
+          const updateListItem = (field, index, value) => {
+            setCurrentJob(prev => ({
+              ...prev,
+              [field]: prev[field].map((item, i) => i === index ? value : item)
+            }));
+          };
+
+          const addListItem = (field) => {
+            setCurrentJob(prev => ({
+              ...prev,
+              [field]: [...prev[field], '']
+            }));
+          };
+
+          const removeListItem = (field, index) => {
+            setCurrentJob(prev => ({
+              ...prev,
+              [field]: prev[field].filter((_, i) => i !== index)
+            }));
+          };
+
+          const removeFormationFromJob = (index) => {
+            setCurrentJob(prev => ({
+              ...prev,
+              formations: prev.formations.filter((_, i) => i !== index)
+            }));
           };
 
           return (
@@ -159,31 +273,520 @@
                       <h1 className="text-3xl font-bold text-gray-800">Interface de Saisie</h1>
                       <p className="text-gray-600">Gestion des données d'orientation</p>
                     </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => document.getElementById('import-file').click()}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                      >
+                        📤 Importer
+                      </button>
+                      <input
+                        id="import-file"
+                        type="file"
+                        accept=".json"
+                        onChange={handleImportJSON}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={handleExportJSON}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      >
+                        💾 Exporter JSON
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 mb-6 border-b">
                     <button
-                      onClick={handleExportJSON}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                      onClick={() => setActiveTab('jobs')}
+                      className={`px-4 py-2 font-medium ${activeTab === 'jobs' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
                     >
-                      <Download />
-                      Exporter JSON
+                      Métiers ({jobs.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('formations')}
+                      className={`px-4 py-2 font-medium ${activeTab === 'formations' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                    >
+                      Formations ({formations.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('preview')}
+                      className={`px-4 py-2 font-medium ${activeTab === 'preview' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                    >
+                      👁️ Aperçu
                     </button>
                   </div>
 
-                  <div className="text-center py-8">
-                    <p className="text-lg text-gray-700 mb-4">
-                      📊 <strong>{jobs.length}</strong> métiers • <strong>{formations.length}</strong> formations
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Créez vos métiers et formations, puis exportez en JSON
-                    </p>
-                  </div>
+                  {activeTab === 'jobs' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <div className="lg:col-span-2 space-y-6">
+                        {editingJobId && (
+                          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex justify-between items-center">
+                            <div>
+                              <strong>✏️ Mode édition</strong>
+                              <p className="text-sm">Vous modifiez : {currentJob.name}</p>
+                            </div>
+                            <button
+                              onClick={() => { setEditingJobId(null); resetCurrentJob(); }}
+                              className="px-3 py-2 bg-white border rounded-lg hover:bg-gray-50"
+                            >
+                              ✖️ Annuler
+                            </button>
+                          </div>
+                        )}
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm">
-                      <strong>ℹ️ Note :</strong> Ceci est une version simplifiée. 
-                      Pour la version complète avec toutes les fonctionnalités, 
-                      utilisez l'application React dans Claude.
-                    </p>
-                  </div>
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">📋 Informations générales</h2>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Nom du métier *</label>
+                              <input
+                                type="text"
+                                value={currentJob.name}
+                                onChange={(e) => setCurrentJob({...currentJob, name: e.target.value})}
+                                className="w-full p-3 border rounded-lg"
+                                placeholder="Ex: Développeur Web"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Domaine *</label>
+                              <select
+                                value={currentJob.domain}
+                                onChange={(e) => setCurrentJob({...currentJob, domain: e.target.value})}
+                                className="w-full p-3 border rounded-lg"
+                              >
+                                <option value="">Sélectionner...</option>
+                                {domains.map(d => <option key={d} value={d}>{d}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Description courte</label>
+                              <input
+                                type="text"
+                                value={currentJob.description}
+                                onChange={(e) => setCurrentJob({...currentJob, description: e.target.value})}
+                                className="w-full p-3 border rounded-lg"
+                                placeholder="Ex: Création et maintenance de sites web"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Description détaillée</label>
+                              <textarea
+                                value={currentJob.detailedDescription}
+                                onChange={(e) => setCurrentJob({...currentJob, detailedDescription: e.target.value})}
+                                className="w-full p-3 border rounded-lg"
+                                rows="4"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">🎓 Études et salaire</h2>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Durées d'études possibles</label>
+                              <div className="flex gap-2">
+                                {[2, 3, 5, 8].map(year => (
+                                  <button
+                                    key={year}
+                                    onClick={() => toggleStudyYear(year)}
+                                    className={`px-4 py-2 rounded-lg border-2 ${currentJob.studyYears.includes(year) ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                                  >
+                                    {year === 8 ? '5+' : year} an{year > 1 ? 's' : ''}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium mb-2">Salaire min (k€/an)</label>
+                                <input
+                                  type="number"
+                                  value={currentJob.salary.min}
+                                  onChange={(e) => setCurrentJob({...currentJob, salary: {...currentJob.salary, min: e.target.value}})}
+                                  className="w-full p-3 border rounded-lg"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium mb-2">Salaire max (k€/an)</label>
+                                <input
+                                  type="number"
+                                  value={currentJob.salary.max}
+                                  onChange={(e) => setCurrentJob({...currentJob, salary: {...currentJob.salary, max: e.target.value}})}
+                                  className="w-full p-3 border rounded-lg"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">📚 Formations associées</h2>
+                          {formations.length > 0 ? (
+                            <>
+                              <select
+                                onChange={(e) => { addFormationToJob(e.target.value); e.target.value = ''; }}
+                                className="w-full p-3 border rounded-lg mb-4"
+                                defaultValue=""
+                              >
+                                <option value="">Ajouter une formation...</option>
+                                {formations.map(f => (
+                                  <option key={f.id} value={f.id}>{f.name} ({f.type} - {f.duration} ans)</option>
+                                ))}
+                              </select>
+                              <div className="space-y-2">
+                                {currentJob.formations.map((f, i) => (
+                                  <div key={i} className="flex items-center justify-between p-3 bg-white border rounded-lg">
+                                    <div>
+                                      <div className="font-medium">{f.name}</div>
+                                      <div className="text-sm text-gray-500">Bac+{f.duration}</div>
+                                    </div>
+                                    <button
+                                      onClick={() => removeFormationFromJob(i)}
+                                      className="text-red-500 hover:bg-red-50 p-2 rounded"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-sm text-gray-500 italic">Créez d'abord des formations dans l'onglet "Formations"</p>
+                          )}
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">💡 Centres d'intérêt</h2>
+                          <div className="grid grid-cols-3 gap-2">
+                            {interestsList.map(interest => (
+                              <button
+                                key={interest}
+                                onClick={() => toggleArrayValue('interests', interest)}
+                                className={`p-2 text-sm rounded-lg border ${currentJob.interests.includes(interest) ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                              >
+                                {interest}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">💎 Valeurs</h2>
+                          <div className="grid grid-cols-4 gap-2">
+                            {valuesList.map(value => (
+                              <button
+                                key={value}
+                                onClick={() => toggleArrayValue('values', value)}
+                                className={`p-2 text-sm rounded-lg border ${currentJob.values.includes(value) ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                              >
+                                {value}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">🏢 Style de travail</h2>
+                          <div className="grid grid-cols-3 gap-2">
+                            {['bureau', 'terrain', 'equipe', 'solo', 'intellectuel', 'manuel'].map(style => (
+                              <button
+                                key={style}
+                                onClick={() => toggleArrayValue('workStyle', style)}
+                                className={`p-2 text-sm rounded-lg border ${currentJob.workStyle.includes(style) ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                              >
+                                {style}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">📖 Matières scolaires</h2>
+                          <div className="grid grid-cols-4 gap-2">
+                            {subjectsList.map(subject => (
+                              <button
+                                key={subject}
+                                onClick={() => toggleArrayValue('subjects', subject)}
+                                className={`p-2 text-sm rounded-lg border ${currentJob.subjects.includes(subject) ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+                              >
+                                {subject}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">📈 Marché de l'emploi</h2>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Opportunités</label>
+                              <select
+                                value={currentJob.jobMarket.opportunities}
+                                onChange={(e) => setCurrentJob({...currentJob, jobMarket: {...currentJob.jobMarket, opportunities: e.target.value}})}
+                                className="w-full p-3 border rounded-lg"
+                              >
+                                <option value="">Sélectionner...</option>
+                                <option value="Faibles">Faibles</option>
+                                <option value="Moyennes">Moyennes</option>
+                                <option value="Bonnes">Bonnes</option>
+                                <option value="Très bonnes">Très bonnes</option>
+                                <option value="Excellentes">Excellentes</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Croissance</label>
+                              <input
+                                type="text"
+                                value={currentJob.jobMarket.growth}
+                                onChange={(e) => setCurrentJob({...currentJob, jobMarket: {...currentJob.jobMarket, growth: e.target.value}})}
+                                className="w-full p-3 border rounded-lg"
+                                placeholder="+15%"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">✅ Avantages</h2>
+                            <button onClick={() => addListItem('advantages')} className="px-3 py-1 bg-green-500 text-white rounded-lg">
+                              ➕ Ajouter
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {currentJob.advantages.map((adv, i) => (
+                              <div key={i} className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={adv}
+                                  onChange={(e) => updateListItem('advantages', i, e.target.value)}
+                                  className="flex-1 p-2 border rounded-lg"
+                                />
+                                <button onClick={() => removeListItem('advantages', i)} className="text-red-500 p-2">🗑️</button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">⚠️ Défis</h2>
+                            <button onClick={() => addListItem('challenges')} className="px-3 py-1 bg-green-500 text-white rounded-lg">
+                              ➕ Ajouter
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {currentJob.challenges.map((chal, i) => (
+                              <div key={i} className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={chal}
+                                  onChange={(e) => updateListItem('challenges', i, e.target.value)}
+                                  className="flex-1 p-2 border rounded-lg"
+                                />
+                                <button onClick={() => removeListItem('challenges', i)} className="text-red-500 p-2">🗑️</button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={handleSaveJob}
+                          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                        >
+                          💾 {editingJobId ? 'Enregistrer les modifications' : 'Enregistrer le métier'}
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 p-4 rounded-lg sticky top-4">
+                          <h3 className="font-bold text-lg mb-2">📋 Résumé</h3>
+                          <div className="space-y-2 text-sm">
+                            <div><strong>Nom:</strong> {currentJob.name || '-'}</div>
+                            <div><strong>Domaine:</strong> {currentJob.domain || '-'}</div>
+                            <div><strong>Études:</strong> {currentJob.studyYears.join(', ') || '-'}</div>
+                            <div><strong>Formations:</strong> {currentJob.formations.length}</div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                          <h3 className="font-bold mb-3">Métiers enregistrés ({jobs.length})</h3>
+                          <div className="space-y-2">
+                            {jobs.map(job => (
+                              <div key={job.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                                <div className="flex-1">
+                                  <div className="font-medium">{job.name}</div>
+                                  <div className="text-xs text-gray-500">{job.domain}</div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <button onClick={() => handleEditJob(job)} className="text-blue-500 p-2">✏️</button>
+                                  <button onClick={() => handleDeleteJob(job.id)} className="text-red-500 p-2">🗑️</button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'formations' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <div className="bg-gray-50 p-6 rounded-lg">
+                          <h2 className="text-xl font-bold mb-4">📚 Créer une formation</h2>
+                          <div className="space-y-4">
+                            <input
+                              type="text"
+                              value={currentFormation.name}
+                              onChange={(e) => setCurrentFormation({...currentFormation, name: e.target.value})}
+                              className="w-full p-3 border rounded-lg"
+                              placeholder="Nom complet *"
+                            />
+                            <input
+                              type="text"
+                              value={currentFormation.shortName}
+                              onChange={(e) => setCurrentFormation({...currentFormation, shortName: e.target.value})}
+                              className="w-full p-3 border rounded-lg"
+                              placeholder="Sigle (ex: BTS SIO)"
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                              <select
+                                value={currentFormation.type}
+                                onChange={(e) => setCurrentFormation({...currentFormation, type: e.target.value})}
+                                className="w-full p-3 border rounded-lg"
+                              >
+                                <option value="">Type *</option>
+                                {formationTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                              </select>
+                              <select
+                                value={currentFormation.duration}
+                                onChange={(e) => setCurrentFormation({...currentFormation, duration: e.target.value})}
+                                className="w-full p-3 border rounded-lg"
+                              >
+                                <option value="">Durée *</option>
+                                <option value="1">1 an</option>
+                                <option value="2">2 ans</option>
+                                <option value="3">3 ans</option>
+                                <option value="5">5 ans</option>
+                                <option value="6">6 ans</option>
+                                <option value="8">8 ans</option>
+                              </select>
+                            </div>
+                            <textarea
+                              value={currentFormation.description}
+                              onChange={(e) => setCurrentFormation({...currentFormation, description: e.target.value})}
+                              className="w-full p-3 border rounded-lg"
+                              rows="3"
+                              placeholder="Description (optionnelle)"
+                            />
+                            <button
+                              onClick={handleSaveFormation}
+                              className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                            >
+                              💾 Enregistrer la formation
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                          <h3 className="font-bold mb-3">Formations créées ({formations.length})</h3>
+                          <div className="space-y-2">
+                            {formations.map(formation => (
+                              <div key={formation.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                                <div className="flex-1">
+                                  <div className="font-medium">{formation.shortName || formation.name}</div>
+                                  <div className="text-xs text-gray-500">{formation.type} - {formation.duration} an{formation.duration > 1 ? 's' : ''}</div>
+                                </div>
+                                <button
+                                  onClick={() => handleDeleteFormation(formation.id)}
+                                  className="text-red-500 p-2"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === 'preview' && (
+                    <div className="space-y-4">
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <h3 className="font-bold mb-2">📊 Statistiques</h3>
+                        <div className="grid grid-cols-4 gap-4 text-center">
+                          <div><div className="text-2xl font-bold text-blue-600">{jobs.length}</div><div className="text-sm">Métiers</div></div>
+                          <div><div className="text-2xl font-bold text-green-600">{formations.length}</div><div className="text-sm">Formations</div></div>
+                          <div><div className="text-2xl font-bold text-purple-600">{new Set(jobs.map(j => j.domain)).size}</div><div className="text-sm">Domaines</div></div>
+                          <div><div className="text-2xl font-bold text-orange-600">{jobs.reduce((acc, j) => acc + j.formations.length, 0)}</div><div className="text-sm">Liens</div></div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border rounded-lg p-4">
+                        <h3 className="font-bold mb-4">Liste des métiers</h3>
+                        <div className="grid gap-4">
+                          {jobs.map(job => (
+                            <div key={job.id} className="border rounded-lg p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h4 className="font-bold text-lg">{job.name}</h4>
+                                  <span className="text-sm text-gray-500">{job.domain}</span>
+                                </div>
+                                <button
+                                  onClick={() => handleEditJob(job)}
+                                  className="text-blue-600 text-sm hover:underline"
+                                >
+                                  ✏️ Modifier
+                                </button>
+                              </div>
+                              <p className="text-sm text-gray-700 mb-2">{job.description}</p>
+                              <div className="flex gap-4 text-xs text-gray-600 mb-2">
+                                <span>📚 {job.studyYears.join(', ')} ans</span>
+                                <span>💰 {job.salary.display}</span>
+                                <span>📈 {job.jobMarket.opportunities}</span>
+                              </div>
+                              {job.formations.length > 0 && (
+                                <div className="mt-2 pt-2 border-t">
+                                  <div className="text-xs font-medium mb-1">Formations:</div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {job.formations.map((f, i) => (
+                                      <span key={i} className="text-xs bg-blue-50 px-2 py-1 rounded">
+                                        {f.name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="bg-white border rounded-lg p-4">
+                        <h3 className="font-bold mb-4">Liste des formations</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          {formations.map(formation => (
+                            <div key={formation.id} className="border rounded-lg p-4">
+                              <div className="font-bold">{formation.name}</div>
+                              <div className="text-sm text-gray-600">{formation.shortName}</div>
+                              <div className="text-xs text-gray-500 mt-2">
+                                {formation.type} - Bac+{formation.duration}
+                              </div>
+                              {formation.description && (
+                                <p className="text-xs text-gray-600 mt-2">{formation.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
