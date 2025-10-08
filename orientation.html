@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Parcours Pro - Test d'Orientation</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Icônes Lucide inline
+        const ChevronRight = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"></polyline></svg>;
+        const ChevronLeft = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>;
+        const Award = (props) => <svg width={props.className?.includes('w-16') ? '64' : '20'} height={props.className?.includes('w-16') ? '64' : '20'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>;
+        const Book = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>;
+        const Clock = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
+        const TrendingUp = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>;
+        const Download = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>;
+        const Heart = (props) => <svg width="20" height="20" viewBox="0 0 24 24" fill={props.fill ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>;
+        const BarChart3 = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>;
+        const RefreshCw = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
+        const Info = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+
+        const OrientationApp = () => {
+          const [step, setStep] = useState(0);
+          const [answers, setAnswers] = useState({
+            bacType: '',
+            studyDuration: '',
+            mobility: '',
+            interests: [],
+            values: [],
+            workStyle: [],
+            subjects: [],
+            excludedDomains: [],
+            priority: 'balanced'
+          });
+          const [results, setResults] = useState(null);
+          const [favorites, setFavorites] = useState([]);
+          const [selectedJob, setSelectedJob] = useState(null);
+
+          const jobs = window.orientationData?.jobs || [
+            {
+              id: 1,
+              name: "Développeur Web",
+              domain: "Informatique",
+              description: "Création et maintenance de sites web et applications",
+              detailedDescription: "Le développeur web conçoit, code et maintient des sites internet et applications web.",
+              studyYears: [2, 3, 5],
+              salary: { min: 30000, max: 45000, display: "30-45k€" },
+              interests: ["technologie", "creation", "logique"],
+              values: ["autonomie", "innovation"],
+              workStyle: ["bureau", "equipe", "intellectuel"],
+              subjects: ["mathematiques", "technologie"],
+              formations: [{ name: "BTS SIO", duration: 2 }, { name: "BUT Informatique", duration: 3 }],
+              jobMarket: { opportunities: "Excellentes", growth: "+15%" },
+              advantages: ["Télétravail possible", "Métier créatif", "Forte demande"],
+              challenges: ["Apprentissage constant", "Deadlines serrées"],
+              relatedJobs: [6, 3]
+            },
+            {
+              id: 2,
+              name: "Infirmier",
+              domain: "Santé",
+              description: "Soins et accompagnement des patients",
+              detailedDescription: "L'infirmier dispense des soins sur prescription médicale.",
+              studyYears: [3],
+              salary: { min: 25000, max: 35000, display: "25-35k€" },
+              interests: ["social", "sciences"],
+              values: ["aider", "utilite"],
+              workStyle: ["terrain", "equipe", "manuel"],
+              subjects: ["svt", "physique"],
+              formations: [{ name: "IFSI", duration: 3 }],
+              jobMarket: { opportunities: "Excellentes", growth: "+10%" },
+              advantages: ["Utilité sociale", "Sécurité emploi"],
+              challenges: ["Horaires variables", "Charge émotionnelle"],
+              relatedJobs: [5]
+            },
+            {
+              id: 3,
+              name: "Designer Graphique",
+              domain: "Création",
+              description: "Conception visuelle pour différents supports",
+              detailedDescription: "Le designer graphique crée des identités visuelles.",
+              studyYears: [2, 3, 5],
+              salary: { min: 25000, max: 40000, display: "25-40k€" },
+              interests: ["creation", "artistique"],
+              values: ["expression", "innovation"],
+              workStyle: ["bureau", "solo", "intellectuel"],
+              subjects: ["arts", "technologie"],
+              formations: [{ name: "BTS Design", duration: 2 }],
+              jobMarket: { opportunities: "Bonnes", growth: "+5%" },
+              advantages: ["Créativité", "Projets variés"],
+              challenges: ["Compétition", "Clients exigeants"],
+              relatedJobs: [1]
+            },
+            {
+              id: 4,
+              name: "Commercial",
+              domain: "Commerce",
+              description: "Développement de la relation client",
+              detailedDescription: "Le commercial prospecte et négocie.",
+              studyYears: [2, 3],
+              salary: { min: 28000, max: 50000, display: "28-50k€" },
+              interests: ["social", "entrepreneurial"],
+              values: ["argent", "autonomie"],
+              workStyle: ["terrain", "equipe", "intellectuel"],
+              subjects: ["economie", "langues"],
+              formations: [{ name: "BTS MCO", duration: 2 }],
+              jobMarket: { opportunities: "Très bonnes", growth: "+8%" },
+              advantages: ["Rémunération attractive", "Autonomie"],
+              challenges: ["Pression objectifs", "Déplacements"],
+              relatedJobs: [8]
+            },
+            {
+              id: 5,
+              name: "Éducateur Spécialisé",
+              domain: "Social",
+              description: "Accompagnement de personnes en difficulté",
+              detailedDescription: "L'éducateur accompagne vers l'autonomie.",
+              studyYears: [3],
+              salary: { min: 24000, max: 32000, display: "24-32k€" },
+              interests: ["social", "psychologie"],
+              values: ["aider", "utilite"],
+              workStyle: ["terrain", "equipe", "manuel"],
+              subjects: ["philosophie", "svt"],
+              formations: [{ name: "DEES", duration: 3 }],
+              jobMarket: { opportunities: "Bonnes", growth: "+7%" },
+              advantages: ["Sens au travail", "Relations humaines"],
+              challenges: ["Charge émotionnelle", "Salaire modeste"],
+              relatedJobs: [2]
+            },
+            {
+              id: 6,
+              name: "Data Analyst",
+              domain: "Informatique",
+              description: "Analyse de données pour la décision",
+              detailedDescription: "Le data analyst analyse de grandes données.",
+              studyYears: [3, 5],
+              salary: { min: 35000, max: 55000, display: "35-55k€" },
+              interests: ["technologie", "logique", "sciences"],
+              values: ["innovation", "argent"],
+              workStyle: ["bureau", "solo", "intellectuel"],
+              subjects: ["mathematiques", "economie"],
+              formations: [{ name: "BUT STID", duration: 3 }],
+              jobMarket: { opportunities: "Excellentes", growth: "+20%" },
+              advantages: ["Métier d'avenir", "Salaires élevés"],
+              challenges: ["Technique complexe", "Mise à jour constante"],
+              relatedJobs: [1]
+            },
+            {
+              id: 7,
+              name: "Architecte",
+              domain: "Construction",
+              description: "Conception de bâtiments",
+              detailedDescription: "L'architecte conçoit des bâtiments.",
+              studyYears: [5, 6],
+              salary: { min: 30000, max: 50000, display: "30-50k€" },
+              interests: ["creation", "artistique", "logique"],
+              values: ["expression", "innovation"],
+              workStyle: ["bureau", "equipe", "intellectuel"],
+              subjects: ["arts", "mathematiques"],
+              formations: [{ name: "ENSA", duration: 5 }],
+              jobMarket: { opportunities: "Moyennes", growth: "+3%" },
+              advantages: ["Créativité", "Projets uniques"],
+              challenges: ["Longues études", "Début difficile"],
+              relatedJobs: [3]
+            },
+            {
+              id: 8,
+              name: "Comptable",
+              domain: "Gestion",
+              description: "Tenue des comptes d'entreprise",
+              detailedDescription: "Le comptable enregistre les opérations.",
+              studyYears: [2, 3, 5],
+              salary: { min: 28000, max: 45000, display: "28-45k€" },
+              interests: ["logique", "gestion"],
+              values: ["stabilite", "precision"],
+              workStyle: ["bureau", "solo", "intellectuel"],
+              subjects: ["mathematiques", "economie"],
+              formations: [{ name: "BTS CG", duration: 2 }],
+              jobMarket: { opportunities: "Bonnes", growth: "+5%" },
+              advantages: ["Stabilité", "Demande constante"],
+              challenges: ["Périodes intenses", "Rigueur exigée"],
+              relatedJobs: [4]
+            }
+          ];
+
+          useEffect(() => {
+            const saved = localStorage.getItem('orientation_progress');
+            if (saved) {
+              try {
+                const data = JSON.parse(saved);
+                if (data.answers) setAnswers(data.answers);
+                if (data.step !== undefined) setStep(data.step);
+                if (data.favorites) setFavorites(data.favorites);
+              } catch (e) {
+                console.log('Erreur');
+              }
+            }
+          }, []);
+
+          useEffect(() => {
+            localStorage.setItem('orientation_progress', JSON.stringify({ step, answers, favorites }));
+          }, [step, answers, favorites]);
+
+          const calculateMatches = () => {
+            const scores = jobs.map(job => {
+              let score = 0;
+              let maxScore = 0;
+              let weights = { studyDuration: 30, interests: 25, values: 20, workStyle: 15, subjects: 10 };
+
+              if (answers.priority === 'quick') {
+                weights = { studyDuration: 50, interests: 20, values: 15, workStyle: 10, subjects: 5 };
+              } else if (answers.priority === 'passion') {
+                weights = { studyDuration: 15, interests: 40, values: 30, workStyle: 10, subjects: 5 };
+              }
+
+              maxScore += weights.studyDuration;
+              if (answers.studyDuration) {
+                const duration = parseInt(answers.studyDuration);
+                if (job.studyYears.some(y => y <= duration)) score += weights.studyDuration;
+              }
+
+              maxScore += weights.interests;
+              const interestMatch = answers.interests.filter(i => job.interests.includes(i)).length;
+              score += (interestMatch / Math.max(answers.interests.length, 1)) * weights.interests;
+
+              maxScore += weights.values;
+              const valueMatch = answers.values.filter(v => job.values.includes(v)).length;
+              score += (valueMatch / Math.max(answers.values.length, 1)) * weights.values;
+
+              maxScore += weights.workStyle;
+              const styleMatch = answers.workStyle.filter(s => job.workStyle.includes(s)).length;
+              score += (styleMatch / Math.max(answers.workStyle.length, 1)) * weights.workStyle;
+
+              maxScore += weights.subjects;
+              const subjectMatch = answers.subjects.filter(s => job.subjects.includes(s)).length;
+              score += (subjectMatch / Math.max(answers.subjects.length, 1)) * weights.subjects;
+
+              if (answers.excludedDomains.includes(job.domain)) score = 0;
+
+              return { ...job, score: Math.round((score / maxScore) * 100) };
+            });
+
+            setResults(scores.sort((a, b) => b.score - a.score).slice(0, 8));
+          };
+
+          const toggleFavorite = (jobId) => {
+            setFavorites(prev => prev.includes(jobId) ? prev.filter(id => id !== jobId) : [...prev, jobId]);
+          };
+
+          const exportResults = () => {
+            const text = `MON PARCOURS PRO\n\n${results.map((job, i) => 
+              `${i + 1}. ${job.name} - ${job.score}%\n   ${job.description}`
+            ).join('\n\n')}`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'orientation.txt';
+            a.click();
+          };
+
+          const resetApp = () => {
+            if (window.confirm('Recommencer ?')) {
+              setResults(null);
+              setStep(0);
+              setAnswers({ bacType: '', studyDuration: '', mobility: '', interests: [], values: [], workStyle: [], subjects: [], excludedDomains: [], priority: 'balanced' });
+              setFavorites([]);
+              setSelectedJob(null);
+              localStorage.removeItem('orientation_progress');
+            }
+          };
+
+          const handleMultiSelect = (field, value) => {
+            setAnswers(prev => ({
+              ...prev,
+              [field]: prev[field].includes(value) ? prev[field].filter(v => v !== value) : [...prev[field], value]
+            }));
+          };
+
+          const steps = [
+            {
+              title: "Profil & Contraintes",
+              content: (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Type de Baccalauréat</label>
+                    <select className="w-full p-3 border rounded-lg" value={answers.bacType} onChange={(e) => setAnswers({...answers, bacType: e.target.value})}>
+                      <option value="">Sélectionner...</option>
+                      <option value="general">Général</option>
+                      <option value="techno">Technologique</option>
+                      <option value="pro">Professionnel</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Durée d'études maximale</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['2', '3', '5', '8'].map(d => (
+                        <button key={d} onClick={() => setAnswers({...answers, studyDuration: d})} className={`p-3 rounded-lg border-2 ${answers.studyDuration === d ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                          {d === '8' ? '5+' : d} an{d > 1 ? 's' : ''}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Mobilité</label>
+                    <select className="w-full p-3 border rounded-lg" value={answers.mobility} onChange={(e) => setAnswers({...answers, mobility: e.target.value})}>
+                      <option value="">Sélectionner...</option>
+                      <option value="local">Ma région</option>
+                      <option value="national">France</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Priorité</label>
+                    <div className="grid gap-3">
+                      {[
+                        { value: 'quick', label: '⚡ Études courtes' },
+                        { value: 'balanced', label: '⚖️ Équilibre' },
+                        { value: 'passion', label: '❤️ Passion' }
+                      ].map(o => (
+                        <button key={o.value} onClick={() => setAnswers({...answers, priority: o.value})} className={`p-3 rounded-lg border-2 text-left ${answers.priority === o.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                          {o.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )
+            },
+            {
+              title: "Centres d'intérêt",
+              content: (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">Vos domaines d'intérêt</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      {value: 'technologie', label: '💻 Technologies'},
+                      {value: 'sciences', label: '🔬 Sciences'},
+                      {value: 'social', label: '🤝 Relations'},
+                      {value: 'creation', label: '🎨 Création'},
+                      {value: 'artistique', label: '🎭 Arts'},
+                      {value: 'logique', label: '🧩 Logique'},
+                      {value: 'entrepreneurial', label: '🚀 Entrepreneuriat'},
+                      {value: 'psychologie', label: '🧠 Psychologie'},
+                      {value: 'gestion', label: '📊 Gestion'}
+                    ].map(i => (
+                      <button key={i.value} onClick={() => handleMultiSelect('interests', i.value)} className={`p-3 rounded-lg border-2 text-left ${answers.interests.includes(i.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                        {i.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            },
+            {
+              title: "Valeurs",
+              content: (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">Ce qui compte pour vous</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      {value: 'aider', label: '❤️ Aider'},
+                      {value: 'argent', label: '💰 Salaire'},
+                      {value: 'autonomie', label: '🦅 Autonomie'},
+                      {value: 'innovation', label: '💡 Innovation'},
+                      {value: 'stabilite', label: '🛡️ Stabilité'},
+                      {value: 'utilite', label: '🌍 Utilité'},
+                      {value: 'expression', label: '🎪 Expression'},
+                      {value: 'precision', label: '🎯 Précision'}
+                    ].map(v => (
+                      <button key={v.value} onClick={() => handleMultiSelect('values', v.value)} className={`p-3 rounded-lg border-2 text-left ${answers.values.includes(v.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            },
+            {
+              title: "Style de travail",
+              content: (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Lieu</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[{value: 'bureau', label: '🏢 Bureau'}, {value: 'terrain', label: '🚶 Terrain'}].map(i => (
+                        <button key={i.value} onClick={() => handleMultiSelect('workStyle', i.value)} className={`p-3 rounded-lg border-2 ${answers.workStyle.includes(i.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                          {i.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Organisation</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[{value: 'equipe', label: '👥 Équipe'}, {value: 'solo', label: '🧑 Solo'}].map(i => (
+                        <button key={i.value} onClick={() => handleMultiSelect('workStyle', i.value)} className={`p-3 rounded-lg border-2 ${answers.workStyle.includes(i.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                          {i.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Type</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[{value: 'intellectuel', label: '🧠 Intellectuel'}, {value: 'manuel', label: '🔧 Manuel'}].map(i => (
+                        <button key={i.value} onClick={() => handleMultiSelect('workStyle', i.value)} className={`p-3 rounded-lg border-2 ${answers.workStyle.includes(i.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                          {i.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )
+            },
+            {
+              title: "Matières préférées",
+              content: (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">Vos matières fortes</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      {value: 'mathematiques', label: '➗ Maths'},
+                      {value: 'physique', label: '⚛️ Physique'},
+                      {value: 'svt', label: '🌱 SVT'},
+                      {value: 'technologie', label: '⚙️ Techno'},
+                      {value: 'economie', label: '📈 Éco'},
+                      {value: 'langues', label: '🌐 Langues'},
+                      {value: 'philosophie', label: '💭 Philo'},
+                      {value: 'arts', label: '🎨 Arts'}
+                    ].map(s => (
+                      <button key={s.value} onClick={() => handleMultiSelect('subjects', s.value)} className={`p-3 rounded-lg border-2 text-left ${answers.subjects.includes(s.value) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+          ];
+
+          const canGoNext = () => {
+            if (step === 0) return answers.bacType && answers.studyDuration && answers.mobility;
+            if (step === 1) return answers.interests.length > 0;
+            if (step === 2) return answers.values.length > 0;
+            if (step === 3) return answers.workStyle.length > 0;
+            if (step === 4) return answers.subjects.length > 0;
+            return true;
+          };
+
+          if (selectedJob) {
+            const job = jobs.find(j => j.id === selectedJob);
+            if (!job) return null;
+            
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+                <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+                  <button onClick={() => setSelectedJob(null)} className="mb-6 flex items-center gap-2 text-blue-600">
+                    <ChevronLeft />Retour
+                  </button>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h1 className="text-3xl font-bold mb-2">{job.name}</h1>
+                      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">{job.domain}</span>
+                    </div>
+                    <button onClick={() => toggleFavorite(job.id)} className={`p-3 rounded-full ${favorites.includes(job.id) ? 'bg-red-100 text-red-600' : 'bg-gray-100'}`}>
+                      <Heart fill={favorites.includes(job.id)} />
+                    </button>
+                  </div>
+                  <p className="text-lg mb-6">{job.detailedDescription}</p>
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg mb-6">
+                    <div><div className="text-sm text-gray-500">Salaire</div><div className="font-bold">{job.salary.display}</div></div>
+                    <div><div className="text-sm text-gray-500">Études</div><div className="font-bold">{job.studyYears.join(' ou ')} ans</div></div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <h3 className="text-xl font-bold mb-3">⚠️ Défis</h3>
+                      <ul className="space-y-2">{job.challenges.map((c, i) => <li key={i}>{c}</li>)}</ul>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-3">📚 Formations</h3>
+                    <div className="space-y-2">
+                      {job.formations.map((f, i) => (
+                        <div key={i} className="p-3 bg-blue-50 rounded-lg">{f.name} (Bac+{f.duration})</div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if (results) {
+            return (
+              <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+                <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+                  <div className="text-center mb-8">
+                    <Award className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+                    <h2 className="text-3xl font-bold">Vos métiers recommandés</h2>
+                  </div>
+                  <div className="flex gap-3 mb-6 justify-center">
+                    <button onClick={exportResults} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg">
+                      <Download />Exporter
+                    </button>
+                    <button onClick={resetApp} className="flex items-center gap-2 px-4 py-2 bg-gray-200 rounded-lg">
+                      <RefreshCw />Recommencer
+                    </button>
+                  </div>
+                  <div className="space-y-6">
+                    {results.map((job, i) => (
+                      <div key={job.id} className="border-2 rounded-xl p-6">
+                        <div className="flex justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl font-bold text-blue-600">#{i + 1}</span>
+                              <h3 className="text-xl font-bold">{job.name}</h3>
+                              <button onClick={() => toggleFavorite(job.id)} className={favorites.includes(job.id) ? 'text-red-500' : 'text-gray-300'}>
+                                <Heart fill={favorites.includes(job.id)} />
+                              </button>
+                            </div>
+                            <p className="text-gray-600 mb-3">{job.description}</p>
+                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">{job.domain}</span>
+                          </div>
+                          <div className="ml-4 text-center">
+                            <div className="text-3xl font-bold text-blue-600">{job.score}%</div>
+                            <div className="text-xs text-gray-500">compatibilité</div>
+                          </div>
+                        </div>
+                        <button onClick={() => setSelectedJob(job.id)} className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100">
+                          <Info />Voir détails
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+              <div className="max-w-3xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8">
+                    <h1 className="text-3xl font-bold mb-2">Mon Parcours Pro</h1>
+                    <p className="text-blue-100">Trouvez votre orientation idéale</p>
+                  </div>
+
+                  <div className="bg-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-600">Étape {step + 1} sur {steps.length}</span>
+                      <span className="text-sm text-gray-500">{Math.round(((step + 1) / steps.length) * 100)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="p-8">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">{steps[step].title}</h2>
+                    {steps[step].content}
+                  </div>
+
+                  <div className="bg-gray-50 p-6 flex justify-between">
+                    <button onClick={() => setStep(step - 1)} disabled={step === 0} className={`flex items-center gap-2 px-6 py-3 rounded-lg ${step === 0 ? 'bg-gray-200 text-gray-400' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                      <ChevronLeft />Précédent
+                    </button>
+
+                    {step < steps.length - 1 ? (
+                      <button onClick={() => setStep(step + 1)} disabled={!canGoNext()} className={`flex items-center gap-2 px-6 py-3 rounded-lg ${!canGoNext() ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+                        Suivant<ChevronRight />
+                      </button>
+                    ) : (
+                      <button onClick={calculateMatches} disabled={!canGoNext()} className={`flex items-center gap-2 px-8 py-3 rounded-lg font-semibold ${!canGoNext() ? 'bg-gray-200 text-gray-400' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+                        Voir mes résultats<Award />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<OrientationApp />);
+    </script>
+</body>
+</html>">✅ Avantages</h3>
+                      <ul className="space-y-2">{job.advantages.map((a, i) => <li key={i}>{a}</li>)}</ul>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-3
