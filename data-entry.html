@@ -10,10 +10,45 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { margin: 0; padding: 0; }
+        .home-button {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.3s ease;
+        }
+        .home-button:hover {
+            background: #f9fafb;
+            border-color: #3b82f6;
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        @media (max-width: 640px) {
+            .home-button span:last-child {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
+
+    <!-- Bouton retour à l'accueil -->
+    <a href="index.html" class="fixed top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg shadow-lg hover:bg-gray-50 hover:border-blue-500 transition-all">
+        <span class="text-xl">🏠</span>
+        <span class="font-medium text-gray-700">Accueil</span>
+    </a>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
